@@ -27,6 +27,12 @@ struct Config {
 fn main() {
     let timer = time::Duration::from_secs(1);
     let config = Pipe::from_args();
+
+    match &config.cmd {
+        Command::Check(config) => println!("You are checking if the config file {:?} and the elasticsearch connections are okay!", config),
+        Command::Stream(config) => println!("You are now streaming logs {:?}, from multiple sources in batches, to elasticsearch", config),
+    }
+
     loop {
         thread::sleep(timer);
 
