@@ -1,2 +1,23 @@
-targets = ""
-destinations = ""
+[destinations.elasticsearch]
+host = "localhost"
+port = 9_200
+username = "kene"
+password = "pssword_kene@"
+
+[sources]
+audios = { }
+
+[sources.files]
+metrics = [ ]
+
+[[sources.files.logs]]
+name = "syslog"
+paths = "/var/log/syslog/*.log"
+
+[[sources.files.logs]]
+name = "messages"
+paths = "/var/log/messages/*.log"
+
+[[sources.files.logs]]
+name = "auth"
+paths = "/var/log/auth.log"

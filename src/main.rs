@@ -1,6 +1,8 @@
-use std::{thread, time};
 use std::path::PathBuf;
 use structopt::StructOpt;
+use crate::collector::streamer;
+
+mod collector;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pipe", about = "Read logs from multiple sources and output to elasticsearch")]
@@ -24,19 +26,13 @@ struct Config {
     config: PathBuf,
 }
 
-fn main() {
-    let timer = time::Duration::from_secs(1);
+#[tokio::main]
+async fn main() {
     let config = Pipe::from_args();
 
     match &config.cmd {
         Command::Check(config) => println!("You are checking if the config file {:?} and the elasticsearch connections are okay!", config),
-        Command::Stream(config) => println!("You are now streaming logs {:?}, from multiple sources in batches, to elasticsearch", config),
-    }
 
-    loop {
-        thread::sleep(timer);
-
-        println!("Reading the target!");
-        println!("{:?}", config);
+        Command::Stream(_config) => streamer::stream().await
     }
 }

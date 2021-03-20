@@ -1,4 +1,31 @@
 {
-  "targets": "",
-  "destinations": ""
+  "destinations": {
+    "elasticsearch": {
+      "host": "http://localhost:9200",
+      "username": "kene",
+      "password": "pssword_kene@"
+    }
+  },
+  "sources": {
+    "files": {
+      "logs": [
+        {
+          "name": "syslog",
+          "paths": "/var/log/syslog/*.log"
+        },
+        {
+          "name": "messages",
+          "paths": "/var/log/messages/*.log"
+        },
+        {
+          "name": "auth",
+          "paths": "/var/log/auth.log"
+        }
+      ],
+      "metrics": []
+    },
+    "audios": {
+
+    }
+  }
 }
