@@ -1,14 +1,17 @@
+use crate::collector::streamer;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use crate::collector::streamer;
 
 mod collector;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "pipe", about = "Read logs from multiple sources and output to elasticsearch")]
+#[structopt(
+    name = "pipe",
+    about = "Read logs from multiple sources and output to elasticsearch"
+)]
 struct Pipe {
     #[structopt(subcommand)]
-    cmd: Command
+    cmd: Command,
 }
 
 #[derive(Debug, StructOpt)]
@@ -31,8 +34,11 @@ async fn main() {
     let config = Pipe::from_args();
 
     match &config.cmd {
-        Command::Check(config) => println!("You are checking if the config file {:?} and the elasticsearch connections are okay!", config),
+        Command::Check(config) => println!(
+            "You are checking if the config file {:?} and the elasticsearch connections are okay!",
+            config
+        ),
 
-        Command::Stream(_config) => streamer::stream().await
+        Command::Stream(_config) => streamer::stream().await,
     }
 }
