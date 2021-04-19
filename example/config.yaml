@@ -1,18 +1,15 @@
 ---
-destinations:
+destination:
   elasticsearch:
     host: localhost
-    port: 9200
     username: kene
     password: pssword_kene@
 sources:
   files:
     logs:
       - name: syslog
-        paths: "/var/log/syslog/*.log"
+        path: "/var/log/syslog/*.log"
       - name: messages
-        paths: "/var/log/messages/*.log"
+        path: "/var/log/messages/*.log"
       - name: auth
-        paths: "/var/log/auth.log"
-    metrics: []
-  audios: {}
+        path: "/var/log/auth.log"

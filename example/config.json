@@ -1,5 +1,5 @@
 {
-  "destinations": {
+  "destination": {
     "elasticsearch": {
       "host": "http://localhost:9200",
       "username": "kene",
@@ -11,21 +11,17 @@
       "logs": [
         {
           "name": "syslog",
-          "paths": "/var/log/syslog/*.log"
+          "path": "/var/log/system.log"
         },
         {
-          "name": "messages",
-          "paths": "/var/log/messages/*.log"
+          "name": "install",
+          "path": "/var/log/install.log"
         },
         {
           "name": "auth",
-          "paths": "/var/log/auth.log"
+          "path": "/var/log/pritunl.log"
         }
-      ],
-      "metrics": []
-    },
-    "audios": {
-
+      ]
     }
   }
 }
