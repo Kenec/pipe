@@ -1,17 +1,16 @@
 use chrono::{DateTime, Utc};
-use reqwest;
 use serde_json::json;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 use crate::ConfigPath;
-use std::path::{PathBuf, Path};
+use std::path::{PathBuf};
 use crate::config::Config;
 use std::collections::HashMap;
-use std::borrow::Borrow;
-use url::{Url, ParseError};
 use std::string::String;
-use std::thread;
 use std::time::Duration;
+use async_std::task;
+use async_std::channel;
+use async_std::fs::File;
+use async_std::io::BufReader;
+use async_std::io::prelude::BufReadExt;
 
 #[derive(Debug)]
 struct LogObservabilityKind {
@@ -28,19 +27,19 @@ struct TracesObservabilityKind {
     traces: Vec<HashMap<String, String>>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Streamer {
     config_path: PathBuf
 }
 
 // create vector of struct to hold the object of sources
 #[derive(Debug)]
-struct Sources {
-    sources: Vec<source>,
+pub struct Sources {
+    sources: Vec<Source>,
 }
 
 #[derive(Debug)]
-struct source {
+struct Source {
     name: String,
     source: PathBuf
 }
@@ -52,8 +51,8 @@ impl Streamer {
     }
 
     // Get sources
-    pub fn load_sources(&self) -> anyhow::Result<Sources> {
-        let mut sources: Vec<source> = vec![];
+    pub async fn load_sources(&self) -> anyhow::Result<Sources> {
+        let mut sources: Vec<Source> = vec![];
         let source_from_config = Config::load(&self.config_path).unwrap();
 
         // get all the source types there are
@@ -82,7 +81,7 @@ impl Streamer {
             let name = &file_in_source["name"];
             let path = &file_in_source["path"];
 
-            let my_source = source { name: String::from(name), source: PathBuf::from(path) };
+            let my_source = Source { name: String::from(name), source: PathBuf::from(path) };
             sources.push(my_source);
         }
 
@@ -90,16 +89,61 @@ impl Streamer {
     }
 
     // Pipe data from sources to Elasticsearch
-    pub async fn stream(&self) {
-        let my_sources:Sources = self.load_sources().unwrap();
+    pub async fn stream(self) {
+        let my_sources: Sources = self.load_sources().await.unwrap();
+        let (sender, receiver) = channel::bounded(100);
 
-        for i in my_sources.sources.iter() {
-            println!("name: {} and source: {:?}", i.name, i.source);
-            self.upstream(i.name.to_string(), i.source.as_path().display().to_string()).await
+        my_sources.sources.into_iter().for_each(|source| {
+            async_std::task::spawn(Streamer::upstream(source,  sender.clone()));
+        });
+
+        // let mut stdout = io::stdout();
+
+        loop {
+            let line = receiver.recv().await.unwrap();
+            let now: DateTime<Utc> = Utc::now();
+            let data = json!({ "event": "log", "data": line.0.to_string(), "@timestamp": now.to_rfc3339() });
+            let url = format!("http://localhost:9200/{}/logs", line.1.to_string());
+            eprintln!("{}", data);
+            let res = reqwest::Client::new().post(url).json(&data).send().await;
+
+            // stdout.write_all(line.as_bytes()).await.unwrap();
+            // match res {
+            //     Err(e) => println!("Error {}", e),
+            //     Ok(..) => (),
+            // }
+            if let Err(e) = res { println!("Error {}", e) }
         }
     }
 
-    async fn upstream(&self, name: String, path: String) {
+    async fn upstream(stream_source: Source, sender: channel::Sender<(String, String)>) {
+        let file = loop {
+          let log_name = &stream_source.name;
+          match File::open(&stream_source.source.as_path()).await {
+              Ok(f) => break (f, log_name),
+              Err(_) => {
+                  println!("#######  {:?} file opened ####### ", stream_source.source.as_path());
+                  task::sleep(Duration::from_secs(1)).await;
+                  continue;
+              }
+          }
+        };
 
+        let mut reader = BufReader::new(file.0);
+        let mut read_until = 0u64;
+
+        loop {
+            let metadata = async_std::fs::metadata(stream_source.source.as_path()).await.unwrap();
+            let file_len = metadata.len();
+
+            if read_until < file_len {
+                let mut buffer = String::new();
+                let read_from_buffer = reader.read_line(&mut buffer).await.unwrap();
+                read_until += read_from_buffer as u64;
+                sender.send(( buffer, file.1.to_string())).await.unwrap();
+            } else {
+                task::sleep(Duration::from_secs(1)).await;
+            }
+        }
     }
 }

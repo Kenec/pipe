@@ -37,15 +37,15 @@ async fn main() {
     let pipe_config = Pipe::from_args();
 
     match pipe_config.cmd {
-        Command::Check(configPath) => {
-            let config = Config::load(&configPath.config).unwrap();
+        Command::Check(config_path) => {
+            let config = Config::load(&config_path.config).unwrap();
             println!("{:?}", config.destination.elasticsearch.host);
             println!("{:?}", config.sources.files.logs);
             println!(
             "You are checking if the config file {:?} and the elasticsearch connections are okay!",
-            configPath
+            config_path
         )},
 
-        Command::Stream(configPath) => Streamer::new(configPath).stream().await
+        Command::Stream(config_path) => Streamer::new(config_path).stream().await
     }
 }
