@@ -94,8 +94,7 @@ impl Streamer {
         let (sender, receiver) = channel::bounded(100);
 
         my_sources.sources.into_iter().for_each(|source| {
-            let streamer = self.clone();
-            async_std::task::spawn(streamer.upstream(source,  sender.clone()));
+            async_std::task::spawn(Streamer::upstream(source,  sender.clone()));
         });
 
         // let mut stdout = io::stdout();
@@ -117,7 +116,7 @@ impl Streamer {
         }
     }
 
-    async fn upstream(self, stream_source: Source, sender: channel::Sender<(String, String)>) {
+    async fn upstream(stream_source: Source, sender: channel::Sender<(String, String)>) {
         let file = loop {
           let log_name = &stream_source.name;
           match File::open(&stream_source.source.as_path()).await {
