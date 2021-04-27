@@ -1,6 +1,5 @@
-use std::path::{PathBuf, Path};
+use std::path::{Path};
 use serde::Deserialize;
-use anyhow::Result;
 use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
@@ -39,7 +38,7 @@ impl Config {
 
         match serde_any::from_file(config_path) {
             Ok(cfg) => Ok(cfg),
-            Err(Error) => Err(anyhow::anyhow!("An error has occurred while loading config, {}", Error)),
+            Err(error) => Err(anyhow::anyhow!("An error has occurred while loading config, {}", error)),
         }
     }
 }
