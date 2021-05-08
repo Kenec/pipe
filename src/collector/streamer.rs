@@ -103,7 +103,7 @@ impl Streamer {
             let line = receiver.recv().await.unwrap();
             let now: DateTime<Utc> = Utc::now();
             let data = json!({ "event": "log", "data": line.0.to_string(), "@timestamp": now.to_rfc3339() });
-            let url = format!("http://localhost:9200/{}/logs", line.1.to_string());
+            let url = format!("http://elasticsearch:9200/{}/logs", line.1.to_string());
             eprintln!("{}", data);
             let res = reqwest::Client::new().post(url).json(&data).send().await;
 
