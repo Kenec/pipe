@@ -1,0 +1,26 @@
+version: "3"
+services:
+  pipe:
+    build: .
+    networks:
+      - pipe-network
+  elasticsearch:
+    image: elasticsearch:7.11.2
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - pipe-network
+    environment:
+      - discovery.type=single-node
+  kibana:
+    image: kibana/kibana:7.11.2
+    ports:
+      - "5601:5601"
+    networks:
+      - pipe-network
+networks:
+  pipe-network:
+    driver: bridge
+
+

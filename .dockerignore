@@ -1,0 +1,10 @@
+# Local build artifacts
+target/
+
+# IDE files
+.vscode
+.idea
+*.iml
+.git/
+.github
+
