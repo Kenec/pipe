@@ -1,10 +1,13 @@
 use crate::collector::streamer::Streamer;
+use crate::validator::file_validator::file_path_validator;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use crate::config::Config;
+use env_logger::Builder;
+use log::LevelFilter;
 
 mod collector;
 mod config;
+mod validator;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -33,18 +36,14 @@ pub struct ConfigPath {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    Builder::new()
+        .filter(None, LevelFilter::Info)
+        .init();
+
     let pipe_config = Pipe::from_args();
 
     match pipe_config.cmd {
-        Command::Check(config_path) => {
-            let config = Config::load(&config_path.config).unwrap();
-            println!("{:?}", config.destination.elasticsearch.host);
-            println!("{:?}", config.sources.files.logs);
-            println!(
-            "You are checking if the config file {:?} and the elasticsearch connections are okay!",
-            config_path
-        )},
+        Command::Check(config_path) => file_path_validator(config_path.config).await,
 
         Command::Stream(config_path) => Streamer::new(config_path).stream().await
     }
