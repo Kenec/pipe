@@ -1,9 +1,8 @@
-use std::path::PathBuf;
 use crate::config::Config;
 use std::path::Path;
+use std::path::PathBuf;
 
 pub async fn file_path_validator(config: PathBuf) {
-
     // load the config
     let loader = Config::load(&config.as_path()).unwrap();
     let files = loader.sources.files;

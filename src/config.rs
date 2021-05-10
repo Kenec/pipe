@@ -1,6 +1,6 @@
-use std::path::{Path};
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::path::Path;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -38,7 +38,10 @@ impl Config {
 
         match serde_any::from_file(config_path) {
             Ok(cfg) => Ok(cfg),
-            Err(error) => Err(anyhow::anyhow!("An error has occurred while loading config, {}", error)),
+            Err(error) => Err(anyhow::anyhow!(
+                "An error has occurred while loading config, {}",
+                error
+            )),
         }
     }
 }

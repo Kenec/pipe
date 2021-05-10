@@ -1,9 +1,9 @@
 use crate::collector::streamer::Streamer;
 use crate::validator::file_validator::file_path_validator;
-use std::path::PathBuf;
-use structopt::StructOpt;
 use env_logger::Builder;
 use log::LevelFilter;
+use std::path::PathBuf;
+use structopt::StructOpt;
 
 mod collector;
 mod config;
@@ -36,15 +36,13 @@ pub struct ConfigPath {
 
 #[tokio::main]
 async fn main() {
-    Builder::new()
-        .filter(None, LevelFilter::Info)
-        .init();
+    Builder::new().filter(None, LevelFilter::Info).init();
 
     let pipe_config = Pipe::from_args();
 
     match pipe_config.cmd {
         Command::Check(config_path) => file_path_validator(config_path.config).await,
 
-        Command::Stream(config_path) => Streamer::new(config_path).stream().await
+        Command::Stream(config_path) => Streamer::new(config_path).stream().await,
     }
 }
