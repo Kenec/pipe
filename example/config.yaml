@@ -2,8 +2,6 @@
 destination:
   elasticsearch:
     host: localhost
-    username: kene
-    password: pssword_kene@
 sources:
   files:
     logs:
