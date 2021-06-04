@@ -1,9 +1,7 @@
 {
   "destination": {
     "elasticsearch": {
-      "host": "http://elasticsearch:9200",
-      "username": "kene",
-      "password": "pssword_kene@"
+      "host": "http://elasticsearch:9200"
     }
   },
   "sources": {

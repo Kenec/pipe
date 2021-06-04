@@ -20,9 +20,7 @@ pub struct Sources {
 
 #[derive(Deserialize, Debug)]
 pub struct Elasticsearch {
-    pub host: String,
-    pub username: Option<String>,
-    pub password: Option<String>,
+    pub host: String
 }
 
 #[derive(Deserialize, Debug)]

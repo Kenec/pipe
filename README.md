@@ -9,9 +9,7 @@ Pipe enables you to stream logs from multiple sources to Elasticsearch.
 {
   "destination": {
     "elasticsearch": {
-      "host": "http://localhost:9200",
-      "username": "kene",
-      "password": "pssword_kene@"
+      "host": "http(s)://[username]:[password]@[host]:[port]/"
     }
   },
   "sources": {

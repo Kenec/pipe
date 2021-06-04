@@ -94,9 +94,18 @@ impl Streamer {
         Ok(Sources { sources })
     }
 
+
+    // Get destinations
+    async fn load_destination(&self) -> String {
+        let destination_from_config = Config::load(&self.config_path).unwrap();
+        return destination_from_config.destination.elasticsearch.host;
+    }
+
     // Pipe data from sources to Elasticsearch
     pub async fn stream(self) {
         let my_sources: Sources = self.load_sources().await.unwrap();
+        let destination_url = self.load_destination().await;
+
         let (sender, receiver) = channel::bounded(100);
 
         my_sources.sources.into_iter().for_each(|source| {
@@ -109,7 +118,7 @@ impl Streamer {
             let line = receiver.recv().await.unwrap();
             let now: DateTime<Utc> = Utc::now();
             let data = json!({ "event": "log", "data": line.0.to_string(), "@timestamp": now.to_rfc3339() });
-            let url = format!("http://elasticsearch:9200/{}/logs", line.1.to_string());
+            let url = format!("{}/{}/logs", destination_url, line.1.to_string());
             eprintln!("{}", data);
             let res = reqwest::Client::new().post(url).json(&data).send().await;
 
